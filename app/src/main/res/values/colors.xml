@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#d43428</color>
+    <color name="primary_dark">#78250c</color>
+    <color name="accent">#DAA520</color>
+    <color name="navigation_bar">#b71c1c</color>
+    <color name="status_bar">#8e290a</color>
+    <color name="primary_text_color">#37960f</color>
+    <color name="text_color">#3b3a3a</color>
+    <!-- Notification color text -->
+    <color name="black">#000000</color>
+    <color name="gray">#737373</color>
+    <color name="white">#ffffff</color>
+</resources>
