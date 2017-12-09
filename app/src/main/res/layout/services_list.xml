@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="top"
@@ -41,10 +42,8 @@
                 android:id="@+id/localDeviceName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="9dp"
-                android:layout_marginTop="12dp"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="14dp"
                 android:layout_toEndOf="@+id/imageView"
                 android:text="New Text"
                 android:textColor="@color/primary_text_color" />
@@ -57,7 +56,8 @@
                 android:layout_alignStart="@+id/localDeviceName"
                 android:layout_below="@+id/localDeviceName"
                 android:text="New Text"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:visibility="invisible" />
 
             <ImageView
                 android:id="@+id/imageView"
@@ -76,7 +76,8 @@
                 android:layout_above="@+id/localDeviceIpAddress"
                 android:layout_alignEnd="@+id/i_am_a_go_textview"
                 android:layout_alignStart="@+id/i_am_a_go_textview"
-                android:layout_alignTop="@+id/localDeviceName" />
+                android:layout_alignTop="@+id/localDeviceName"
+                tools:ignore="UnknownId" />
 
             <TextView
                 android:id="@+id/i_am_a_go_textview"

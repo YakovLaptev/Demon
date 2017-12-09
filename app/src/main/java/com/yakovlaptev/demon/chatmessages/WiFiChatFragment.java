@@ -190,12 +190,12 @@ public class WiFiChatFragment extends Fragment {
 
                             addToWaitingToSendQueueAndTryReconnect();
                         }
-
-                        pushMessage("Me: " + chatLine.getText().toString());
+                        /**добавить свое имя из базы*/
+                        pushMessage(chatLine.getText().toString());
+                        //Log.d("TEST", chatLine.getText().toString());
                         chatLine.setText("");
                     }
                 });
-
         return view;
     }
 

@@ -6,18 +6,21 @@
     <item
         android:id="@+id/discovery"
         android:icon="@drawable/ic_action_search_searching"
-        android:title="Discovery"
-        app:showAsAction="always"/>
+        android:title="@string/discovery"
+        android:visible="false"
+        app:showAsAction="always" />
 
     <item
-        android:id="@+id/disconenct"
+        android:id="@+id/disconnect"
         android:icon="@drawable/ic_action_disconnect"
-        android:title="Disconnect"
+        android:title="@string/disconnect"
+        android:visible="false"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/cancelConnection"
         android:icon="@drawable/ic_action_remove"
-        android:title="Cancel connection"
+        android:title="@string/cancel_connection"
+        android:visible="false"
         app:showAsAction="ifRoom" />
 </menu>

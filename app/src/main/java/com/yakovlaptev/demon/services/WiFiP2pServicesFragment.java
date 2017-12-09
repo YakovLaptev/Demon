@@ -118,9 +118,9 @@ public class WiFiP2pServicesFragment extends Fragment implements
             ImageView goLogoImageView = (ImageView) getView().findViewById(R.id.go_logo);
             TextView i_am_a_go_textView = (TextView) getView().findViewById(R.id.i_am_a_go_textview);
 
-            goLogoImageView.setImageDrawable(getResources().getDrawable(R.drawable.go_logo));
-            goLogoImageView.setVisibility(View.VISIBLE);
-            i_am_a_go_textView.setVisibility(View.VISIBLE);
+            //goLogoImageView.setImageDrawable(getResources().getDrawable(R.drawable.go_logo));
+            //goLogoImageView.setVisibility(View.VISIBLE);
+            //i_am_a_go_textView.setVisibility(View.VISIBLE);
         }
     }
 

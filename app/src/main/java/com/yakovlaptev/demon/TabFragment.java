@@ -138,7 +138,7 @@ public class TabFragment extends Fragment {
      * one of the sections/tabs/pages.
      */
     public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
-        public SectionsPagerAdapter(FragmentManager fm) {
+        SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
@@ -162,7 +162,7 @@ public class TabFragment extends Fragment {
             Locale l = Locale.getDefault();
             switch (position) {
                 case 0:
-                    return ("Services").toUpperCase(l);
+                    return ("Users").toUpperCase(l);
                 default:
                     //if possibile use the devicename like tabname.
                     //Attention this isn't working. Please be careful.
@@ -170,7 +170,8 @@ public class TabFragment extends Fragment {
 //                        return DeviceTabList.getInstance().getDevice(position).deviceName.toUpperCase(l);
 //                    }
                     //use this to be sure
-                    return ("Chat" + position).toUpperCase(l);
+                    /**добавить ник с кем чат из базы*/
+                    return ("Chat " + position).toUpperCase(l);
             }
         }
     }

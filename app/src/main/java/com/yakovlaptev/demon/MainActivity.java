@@ -111,6 +111,8 @@ public class MainActivity extends ActionBarActivity implements
 
     private ChatManager chatManager;
 
+    private WifiP2pDevice p2pDevice;
+
     /**
      * Method to get the {@link android.os.Handler}.
      *
@@ -680,7 +682,7 @@ public class MainActivity extends ActionBarActivity implements
                 //if the message received contains Configuration.MAGICADDRESSKEYWORD is because now someone want to connect to this device
                 if (readMessage.contains(Configuration.MAGICADDRESSKEYWORD)) {
 
-                    WifiP2pDevice p2pDevice = new WifiP2pDevice();
+                    p2pDevice = new WifiP2pDevice();
                     p2pDevice.deviceAddress = readMessage.split("___")[1];
                     p2pDevice.deviceName = readMessage.split("___")[2];
                     P2pDestinationDevice device = new P2pDestinationDevice(p2pDevice);
@@ -689,7 +691,7 @@ public class MainActivity extends ActionBarActivity implements
                         Log.d(TAG, "handleMessage, p2pDevice created with: " + p2pDevice.deviceName + ", " + p2pDevice.deviceAddress);
                         manageAddressMessageReception(device);
                     } else if (readMessage.split("___").length == 4) {
-                        device.setDestinationIpAddress(readMessage.split("___")[3]);
+                        device.setDestinationIpAddress(readMessage.split("")[3]);
 
                         //set client ip address
                         TabFragment.getWiFiP2pServicesFragment().setLocalDeviceIpAddress(device.getDestinationIpAddress());
@@ -698,8 +700,8 @@ public class MainActivity extends ActionBarActivity implements
                                 + p2pDevice.deviceAddress + ", " + device.getDestinationIpAddress());
                         manageAddressMessageReception(device);
                     }
+                    readMessage = readMessage.split("___")[1] + " in chat";
                 }
-
 
                 //i check if tabNum is valid only to be sure.
                 //i using this if, because this peace of code is critical and "sometimes can throw exceptions".
@@ -711,12 +713,12 @@ public class MainActivity extends ActionBarActivity implements
                         // only by the logic without display anything.
                         if (readMessage.contains(Configuration.MAGICADDRESSKEYWORD)) {
                             readMessage = readMessage.replace("+", "");
-                            readMessage = readMessage.replace(Configuration.MAGICADDRESSKEYWORD, "Mac Address");
+                            readMessage = readMessage.replace(Configuration.MAGICADDRESSKEYWORD, "");
                         }
-                        tabFragment.getChatFragmentByTab(tabNum).pushMessage("Buddy: " + readMessage);
+                        tabFragment.getChatFragmentByTab(tabNum).pushMessage(p2pDevice.deviceName + ": " + readMessage);
                     } else {
                         if (!readMessage.contains(Configuration.MAGICADDRESSKEYWORD)) {
-                            tabFragment.getChatFragmentByTab(tabNum).pushMessage("Buddy: " + readMessage);
+                            tabFragment.getChatFragmentByTab(tabNum).pushMessage(p2pDevice.deviceName + ": " + readMessage);
                         }
                     }
 
@@ -882,37 +884,25 @@ public class MainActivity extends ActionBarActivity implements
 
                 if (discoveryStatus) {
                     discoveryStatus = false;
-
                     item.setIcon(R.drawable.ic_action_search_stopped);
-
                     internalStopDiscovery();
-
                 } else {
                     discoveryStatus = true;
-
                     item.setIcon(R.drawable.ic_action_search_searching);
-
                     startRegistration();
                     discoverService();
                 }
 
                 updateServiceAdapter();
-
                 this.setTabFragmentToPage(0);
-
                 return true;
-            case R.id.disconenct:
-
+            case R.id.disconnect:
                 this.setTabFragmentToPage(0);
-
                 this.forceDisconnectAndStartDiscovery();
                 return true;
             case R.id.cancelConnection:
-
                 this.setTabFragmentToPage(0);
-
                 this.forcedCancelConnect();
-
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

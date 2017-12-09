@@ -93,7 +93,7 @@ public class WiFiServicesAdapter extends RecyclerView.Adapter<WiFiServicesAdapte
 
         WiFiP2pService service = ServiceList.getInstance().getElementByPosition(position);
         if (service != null) {
-            viewHolder.nameText.setText(String.format("%s - %s", service.getDevice().deviceName, service.getInstanceName()));
+            viewHolder.nameText.setText(service.getDevice().deviceName);
             viewHolder.macAddressText.setText(service.getDevice().deviceAddress);
             viewHolder.statusText.setText(getDeviceStatus(service.getDevice().status));
         }
