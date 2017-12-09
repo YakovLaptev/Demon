@@ -24,6 +24,11 @@
         <item name="windowActionBar">false</item>
     </style>
 
+    <style name="Theme.Splash" parent="android:Theme">
+        <item name="android:windowBackground">@drawable/splash</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <!-- AlertDialog styles -->
     <!--<style name="alertDialogStyle" parent="Theme.AppCompat.Dialog">-->
     <!--<item name="android:background">#FF0000</item>-->
