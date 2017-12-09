@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -17,8 +18,10 @@
         android:layout_marginLeft="8dp"
         android:layout_marginTop="6dp"
         android:text="YOU"
+        android:textAllCaps="true"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/primary" />
+        android:textColor="@color/primary"
+        android:textStyle="bold" />
 
     <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:card_view="http://schemas.android.com/apk/res-auto"
@@ -32,7 +35,7 @@
         android:clickable="true"
         android:elevation="100dp"
         android:foreground="?android:attr/selectableItemBackground"
-        card_view:cardBackgroundColor="@color/cardview_light_background">
+        card_view:cardBackgroundColor="@color/almostBlack">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -46,7 +49,8 @@
                 android:layout_marginStart="14dp"
                 android:layout_toEndOf="@+id/imageView"
                 android:text="New Text"
-                android:textColor="@color/primary_text_color" />
+                android:textColor="@color/primary_text_color"
+                android:textSize="15sp" />
 
             <TextView
                 android:id="@+id/localDeviceAddress"
@@ -103,8 +107,10 @@
         android:layout_marginLeft="8dp"
         android:layout_marginTop="6dp"
         android:text="THEY"
+        android:textAllCaps="true"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/primary" />
+        android:textColor="@color/primary"
+        android:textStyle="bold" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
