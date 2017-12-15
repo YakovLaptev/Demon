@@ -11,7 +11,9 @@
     android:layout_marginTop="6dp"
     android:clickable="true"
     android:elevation="100dp"
-    android:foreground="?android:attr/selectableItemBackground">
+    android:foreground="?android:attr/selectableItemBackground"
+    card_view:cardBackgroundColor="@color/almostBlack"
+    card_view:contentPadding="2dp">
 
     <RelativeLayout
         android:layout_width="match_parent"

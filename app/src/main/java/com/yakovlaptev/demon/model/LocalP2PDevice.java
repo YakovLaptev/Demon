@@ -14,7 +14,10 @@ package com.yakovlaptev.demon.model;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import android.net.wifi.p2p.WifiP2pDevice;
+
+import com.yakovlaptev.demon.data.Profile;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +31,7 @@ public class LocalP2PDevice {
 
     //This is the localdevice!!!
     @Getter @Setter private WifiP2pDevice localDevice;
+    @Getter @Setter private Profile profile;
 
     private static final LocalP2PDevice instance = new LocalP2PDevice();
 
@@ -43,6 +47,7 @@ public class LocalP2PDevice {
      * Private constructor, because is a singleton class.
      */
     private LocalP2PDevice(){
+        profile = new Profile();
         localDevice = new WifiP2pDevice();
     }
 

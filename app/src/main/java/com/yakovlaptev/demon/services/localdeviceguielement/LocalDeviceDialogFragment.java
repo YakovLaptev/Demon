@@ -24,6 +24,8 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.yakovlaptev.R;
+import com.yakovlaptev.demon.data.Profile;
+import com.yakovlaptev.demon.model.LocalP2PDevice;
 
 /**
  * Class that represents the DialogFragment to change the local device name, not only in the GUI
@@ -35,13 +37,16 @@ public class LocalDeviceDialogFragment extends DialogFragment {
 
     private Button confirmButton;
     private EditText deviceNameEditText;
+    private EditText deviceEmailEditText;
+    private Profile profile;
+
 
     /**
      * {@link com.yakovlaptev.demon.services.WiFiP2pServicesFragment} implements this interface.
      * But the method to change the device name in
      */
     public interface DialogConfirmListener {
-        public void changeLocalDeviceName(String deviceName);
+        public void changeLocalDeviceName(Profile profile);
     }
 
     /**
@@ -70,9 +75,14 @@ public class LocalDeviceDialogFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.dialog, container, false);
 
-        getDialog().setTitle(getResources().getString(R.string.choose_device_name));
+        //getDialog().setTitle(getResources().getString(R.string.choose_device_name));
         deviceNameEditText = (EditText) v.findViewById(R.id.deviceNameEditText);
+        deviceEmailEditText = (EditText) v.findViewById(R.id.deviceEmailEditText);
         confirmButton = (Button) v.findViewById(R.id.confirmButton);
+
+        profile = LocalP2PDevice.getInstance().getProfile();
+        deviceNameEditText.setText(profile.getName());
+        deviceEmailEditText.setText(profile.getEmail());
 
         //set listener to call changeLocalDeviceName in WiFiP2pServicesFragment, after a click on confirmButton
         this.setListener();
@@ -84,7 +94,9 @@ public class LocalDeviceDialogFragment extends DialogFragment {
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                ((DialogConfirmListener)getTargetFragment()).changeLocalDeviceName(deviceNameEditText.getText().toString());
+                profile.setName(deviceNameEditText.getText().toString());
+                profile.setEmail(deviceEmailEditText.getText().toString());
+                ((DialogConfirmListener)getTargetFragment()).changeLocalDeviceName(profile);
                 dismiss();
             }
         });

@@ -18,8 +18,10 @@ package com.yakovlaptev.demon;
  */
 
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
@@ -52,6 +54,7 @@ import com.yakovlaptev.demon.chatmessages.WiFiChatFragment;
 import com.yakovlaptev.demon.chatmessages.messagefilter.MessageException;
 import com.yakovlaptev.demon.chatmessages.messagefilter.MessageFilter;
 import com.yakovlaptev.demon.chatmessages.waitingtosend.WaitingToSendQueue;
+import com.yakovlaptev.demon.data.Profile;
 import com.yakovlaptev.demon.model.LocalP2PDevice;
 import com.yakovlaptev.demon.model.P2pDestinationDevice;
 import com.yakovlaptev.demon.services.ServiceList;
@@ -63,13 +66,14 @@ import com.yakovlaptev.demon.socketmanagers.ClientSocketHandler;
 import com.yakovlaptev.demon.socketmanagers.GroupOwnerSocketHandler;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
+
+import static com.yakovlaptev.demon.SplashScreen.dbHelper;
 
 /**
  * Main Activity of Pidgeon / WiFiDirect MultiChat
@@ -531,40 +535,23 @@ public class MainActivity extends ActionBarActivity implements
     public void addColorActiveTabs(boolean grayScale) {
         Log.d(TAG, "addColorActiveTabs() called, tabNum= " + tabNum);
 
-        //27-02-15 : new implementation of this feature.
         if (tabFragment.isValidTabNum(tabNum) && tabFragment.getChatFragmentByTab(tabNum) != null) {
             tabFragment.getChatFragmentByTab(tabNum).setGrayScale(grayScale);
             tabFragment.getChatFragmentByTab(tabNum).updateChatMessageListAdapter();
         }
     }
 
-    /**
-     * This method sets the name of this {@link com.yakovlaptev.demon.model.LocalP2PDevice}
-     * in the UI and inside the device. In this way, all other devices can see this updated name during the discovery phase.
-     * Attention, WifiP2pManager uses an annotation called @hide to hide the method setDeviceName, in Android SDK.
-     * This method uses Java reflection to call this hidden method.
-     *
-     * @param deviceName String that represents the visible device name of a device, during discovery.
-     */
-    public void setDeviceNameWithReflection(String deviceName) {
-        try {
-            Method m = manager.getClass().getMethod(
-                    "setDeviceName",
-                    Channel.class, String.class,
-                    ActionListener.class);
 
-            m.invoke(manager, channel, deviceName,
-                    new CustomizableActionListener(
-                            MainActivity.this,
-                            "setDeviceNameWithReflection",
-                            "Device name changed",
-                            "Device name changed",
-                            "Error, device name not changed",
-                            "Error, device name not changed"));
-        } catch (Exception e) {
-            Log.e(TAG, "Exception during setDeviceNameWithReflection", e);
-            Toast.makeText(MainActivity.this, "Impossible to change the device name", Toast.LENGTH_SHORT).show();
-        }
+    public void changeProfile(Profile profile) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        String strFilter = "_id=" + 1;
+        ContentValues cv = new ContentValues();
+        cv.put("name", profile.getName());
+        cv.put("email", profile.getEmail());
+        String LOG_TAG = "Logs";
+        Log.d(LOG_TAG, "name = " + profile.getName() + "  email = " + profile.getEmail());
+        db.update("profile", cv, strFilter, null);
+        dbHelper.close();
     }
 
     /**
@@ -834,14 +821,11 @@ public class MainActivity extends ActionBarActivity implements
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         //-----------------------------------------
-
         setContentView(R.layout.main);
-
         //activate the wakelock
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         this.setupToolBar();
-
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);

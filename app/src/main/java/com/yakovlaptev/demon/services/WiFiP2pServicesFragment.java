@@ -16,12 +16,15 @@ package com.yakovlaptev.demon.services;
  * limitations under the License.
  */
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,8 +33,11 @@ import android.widget.TextView;
 
 import com.yakovlaptev.R;
 import com.yakovlaptev.demon.MainActivity;
+import com.yakovlaptev.demon.SplashScreen;
+import com.yakovlaptev.demon.data.Profile;
 import com.yakovlaptev.demon.model.LocalP2PDevice;
 import com.yakovlaptev.demon.services.localdeviceguielement.LocalDeviceDialogFragment;
+
 import lombok.Getter;
 
 /**
@@ -57,6 +63,7 @@ public class WiFiP2pServicesFragment extends Fragment implements
     @Getter private WiFiServicesAdapter mAdapter;
 
     private TextView localDeviceNameText;
+    private TextView localDeviceEmailText;
 
     /**
      * Callback interface to call methods tryToConnectToAService in {@link com.yakovlaptev.demon.MainActivity}.
@@ -82,16 +89,18 @@ public class WiFiP2pServicesFragment extends Fragment implements
 
     /**
      * Method to change the local device name and update the GUI element.
-     * @param deviceName String that represents the device name.
+     * @param profile String that represents the device name.
      */
     @Override
-    public void changeLocalDeviceName(String deviceName) {
-        if(deviceName==null) {
+    public void changeLocalDeviceName(Profile profile) {
+        if(profile.getName()==null || profile.getEmail()==null) {
             return;
         }
+        LocalP2PDevice.getInstance().setProfile(profile);
+        localDeviceNameText.setText(profile.getName());
+        localDeviceEmailText.setText(profile.getEmail());
 
-        localDeviceNameText.setText(deviceName);
-        ((MainActivity)getActivity()).setDeviceNameWithReflection(deviceName);
+        ((MainActivity)getActivity()).changeProfile(profile);
     }
 
     /**
@@ -181,7 +190,27 @@ public class WiFiP2pServicesFragment extends Fragment implements
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         localDeviceNameText = (TextView) rootView.findViewById(R.id.localDeviceName);
-        localDeviceNameText.setText(LocalP2PDevice.getInstance().getLocalDevice().deviceName);
+        localDeviceEmailText = (TextView) rootView.findViewById(R.id.localDeviceEmail);
+
+        SplashScreen.DBHelper dbHelper = SplashScreen.dbHelper;
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        Cursor cursor = db.query("profile", null, null, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            int nameColIndex = cursor.getColumnIndex("name");
+            int emailColIndex = cursor.getColumnIndex("email");
+            Profile profile = new Profile();
+            profile.setName(cursor.getString(nameColIndex));
+            profile.setEmail(cursor.getString(emailColIndex));
+            LocalP2PDevice.getInstance().setProfile(profile);
+            localDeviceNameText.setText(profile.getName());
+            localDeviceEmailText.setText(profile.getEmail());
+        } else {
+            localDeviceNameText.setText(LocalP2PDevice.getInstance().getLocalDevice().deviceName);
+        }
+        dbHelper.close();
+        cursor.close();
+
+
 
         TextView localDeviceAddressText = (TextView) rootView.findViewById(R.id.localDeviceAddress);
         localDeviceAddressText.setText(LocalP2PDevice.getInstance().getLocalDevice().deviceAddress);
