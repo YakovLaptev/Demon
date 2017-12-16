@@ -34,9 +34,12 @@ import android.widget.TextView;
 import com.yakovlaptev.R;
 import com.yakovlaptev.demon.MainActivity;
 import com.yakovlaptev.demon.SplashScreen;
+import com.yakovlaptev.demon.data.ImageConverter;
 import com.yakovlaptev.demon.data.Profile;
 import com.yakovlaptev.demon.model.LocalP2PDevice;
 import com.yakovlaptev.demon.services.localdeviceguielement.LocalDeviceDialogFragment;
+
+import java.util.Objects;
 
 import lombok.Getter;
 
@@ -86,11 +89,6 @@ public class WiFiP2pServicesFragment extends Fragment implements
      */
     public WiFiP2pServicesFragment() {}
 
-
-    /**
-     * Method to change the local device name and update the GUI element.
-     * @param profile String that represents the device name.
-     */
     @Override
     public void changeLocalDeviceName(Profile profile) {
         if(profile.getName()==null || profile.getEmail()==null) {
@@ -113,7 +111,7 @@ public class WiFiP2pServicesFragment extends Fragment implements
     public void itemClicked(View view) {
         int clickedPosition = mRecyclerView.getChildPosition(view);
 
-        if(clickedPosition>=0) { //a little check :)
+        if(clickedPosition>=0) {
             ((DeviceClickListener) getActivity()).tryToConnectToAService(clickedPosition);
         }
     }
@@ -191,6 +189,7 @@ public class WiFiP2pServicesFragment extends Fragment implements
 
         localDeviceNameText = (TextView) rootView.findViewById(R.id.localDeviceName);
         localDeviceEmailText = (TextView) rootView.findViewById(R.id.localDeviceEmail);
+        ImageView avatar = (ImageView) rootView.findViewById(R.id.imageView);
 
         SplashScreen.DBHelper dbHelper = SplashScreen.dbHelper;
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -198,12 +197,20 @@ public class WiFiP2pServicesFragment extends Fragment implements
         if (cursor.moveToFirst()) {
             int nameColIndex = cursor.getColumnIndex("name");
             int emailColIndex = cursor.getColumnIndex("email");
+            int avatarColIndex = cursor.getColumnIndex("avatar");
             Profile profile = new Profile();
             profile.setName(cursor.getString(nameColIndex));
             profile.setEmail(cursor.getString(emailColIndex));
+            profile.setAvatar(cursor.getString(avatarColIndex));
             LocalP2PDevice.getInstance().setProfile(profile);
             localDeviceNameText.setText(profile.getName());
             localDeviceEmailText.setText(profile.getEmail());
+            Log.d("-----", "avatar = " + profile.getAvatar());
+            if(Objects.equals(profile.getAvatar(), "")) {
+                avatar.setImageDrawable(getResources().getDrawable(R.drawable.android_logo_device));
+            } else {
+                avatar.setImageBitmap(ImageConverter.convertToBitmap(profile.getAvatar()));
+            }
         } else {
             localDeviceNameText.setText(LocalP2PDevice.getInstance().getLocalDevice().deviceName);
         }

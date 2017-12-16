@@ -45,7 +45,7 @@ public class SplashScreen extends Activity {
             super(context, "p2pChat", null, 1);
             Log.d(LOG_TAG, "---  onCreate ---");
             SQLiteDatabase db = getWritableDatabase();
-            db.execSQL("create table if not exists profile (_id integer primary key autoincrement,name text,email text);");
+            db.execSQL("create table if not exists profile (_id integer primary key autoincrement,name text,email text,avatar text);");
         }
 
         @Override

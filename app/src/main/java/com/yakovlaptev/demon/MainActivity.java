@@ -20,9 +20,12 @@ package com.yakovlaptev.demon;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -37,13 +40,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.yakovlaptev.R;
@@ -54,6 +60,8 @@ import com.yakovlaptev.demon.chatmessages.WiFiChatFragment;
 import com.yakovlaptev.demon.chatmessages.messagefilter.MessageException;
 import com.yakovlaptev.demon.chatmessages.messagefilter.MessageFilter;
 import com.yakovlaptev.demon.chatmessages.waitingtosend.WaitingToSendQueue;
+import com.yakovlaptev.demon.data.DBManager;
+import com.yakovlaptev.demon.data.ImageConverter;
 import com.yakovlaptev.demon.data.Profile;
 import com.yakovlaptev.demon.model.LocalP2PDevice;
 import com.yakovlaptev.demon.model.P2pDestinationDevice;
@@ -541,7 +549,6 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-
     public void changeProfile(Profile profile) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         String strFilter = "_id=" + 1;
@@ -552,6 +559,37 @@ public class MainActivity extends ActionBarActivity implements
         Log.d(LOG_TAG, "name = " + profile.getName() + "  email = " + profile.getEmail());
         db.update("profile", cv, strFilter, null);
         dbHelper.close();
+    }
+
+    public void changeAvatar(View view) {
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        photoPickerIntent.setType("image/*");
+        startActivityForResult(photoPickerIntent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+        super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+
+        Bitmap bitmap = null;
+        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        //ImageView imageView2 = (ImageView) findViewById(R.id.imageViewAvatar);
+
+        switch(requestCode) {
+            case 1:
+                if(resultCode == RESULT_OK){
+                    Uri selectedImage = imageReturnedIntent.getData();
+                    try {
+                        bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    imageView.setImageBitmap(bitmap);
+                    DBManager.dbInsert(new String[]{"avatar"}, new String[]{ImageConverter.convertToBase64(bitmap)});
+                    // Log.d("-----", str);
+                    //imageView2.setImageBitmap(bitmap);
+                }
+        }
     }
 
     /**

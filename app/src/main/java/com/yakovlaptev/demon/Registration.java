@@ -37,6 +37,7 @@ public class Registration extends Activity {
 
         cv.put("name", name);
         cv.put("email", email);
+        cv.put("avatar", "");
 
         long rowID = db.insert("profile", null, cv);
         Log.d(LOG_TAG, "row inserted, ID = " + rowID);

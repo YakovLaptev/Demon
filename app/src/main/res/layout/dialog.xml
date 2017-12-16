@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
@@ -39,6 +40,16 @@
         android:layout_marginLeft="6dp"
         android:layout_marginRight="6dp"
         android:hint="Your email" />
+
+    <ImageView
+        android:id="@+id/imageViewAvatar"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginLeft="110sp"
+        android:layout_marginRight="110sp"
+        android:src="@drawable/android_logo_device"
+        android:onClick="changeAvatar"
+        android:scaleType="centerCrop" />
 
     <Button
         android:id="@+id/confirmButton"

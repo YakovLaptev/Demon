@@ -6,29 +6,35 @@ import java.io.Serializable;
 
 public class Profile implements Serializable {
 
-    private String name, email;
-
-    public Profile() {}
+    private String name, email, avatar;
 
     public String getName() {
         return name;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     @SuppressLint("DefaultLocale")
     @Override
     public String toString() {
-        return String.format("name:%s   email:%s", name, email);
+        return String.format("name:%s   email:%s   email:%s", name, email, avatar);
     }
 }
