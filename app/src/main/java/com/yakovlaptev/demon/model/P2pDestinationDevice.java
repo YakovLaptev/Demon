@@ -31,6 +31,8 @@ import lombok.Setter;
 public class P2pDestinationDevice {
 
     @Getter private WifiP2pDevice p2pDevice;
+    @Getter @Setter private String email;
+    @Getter @Setter private byte[] avatar;
     @Getter @Setter private String destinationIpAddress; //it's the ip address
 
 

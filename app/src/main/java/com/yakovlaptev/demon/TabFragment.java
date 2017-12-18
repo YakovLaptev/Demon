@@ -17,8 +17,10 @@ import com.yakovlaptev.demon.services.WiFiP2pServicesFragment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import lombok.Getter;
+import lombok.Setter;
 
 /*
  * Copyright (C) 2015-2016 Stefano Cappa
@@ -47,6 +49,8 @@ public class TabFragment extends Fragment {
     private SectionsPagerAdapter mSectionsPagerAdapter;
     @Getter
     private ViewPager mViewPager;
+    @Setter
+    private String userName;
     @Getter
     private static WiFiP2pServicesFragment wiFiP2pServicesFragment;
     @Getter
@@ -170,8 +174,8 @@ public class TabFragment extends Fragment {
 //                        return DeviceTabList.getInstance().getDevice(position).deviceName.toUpperCase(l);
 //                    }
                     //use this to be sure
-                    /**добавить ник с кем чат из базы*/
-                    return ("Chat " + position).toUpperCase(l);
+                    if (!(Objects.equals(userName, ""))) return (userName).toUpperCase(l);
+                    else return ("").toUpperCase(l);
             }
         }
     }

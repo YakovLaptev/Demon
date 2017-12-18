@@ -18,7 +18,11 @@ public class SplashScreen extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(LOG_TAG, "------------");
+
         dbHelper = new DBHelper(this);
+        Log.d(LOG_TAG, "------------");
+
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -45,7 +49,8 @@ public class SplashScreen extends Activity {
             super(context, "p2pChat", null, 1);
             Log.d(LOG_TAG, "---  onCreate ---");
             SQLiteDatabase db = getWritableDatabase();
-            db.execSQL("create table if not exists profile (_id integer primary key autoincrement,name text,email text,avatar text);");
+            db.execSQL("create table if not exists profile (_id integer primary key autoincrement,name text,email text,avatar blob);");
+            db.execSQL("create table if not exists history (_id integer primary key autoincrement,adress text,name text,message text);");
         }
 
         @Override

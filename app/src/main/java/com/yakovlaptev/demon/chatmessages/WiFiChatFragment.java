@@ -1,4 +1,3 @@
-
 package com.yakovlaptev.demon.chatmessages;
 /*
  * Copyright (C) 2015-2016 Stefano Cappa
@@ -16,6 +15,9 @@ package com.yakovlaptev.demon.chatmessages;
  * limitations under the License.
  */
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -28,6 +30,7 @@ import android.widget.TextView;
 
 import com.yakovlaptev.R;
 import com.yakovlaptev.demon.DestinationDeviceTabList;
+import com.yakovlaptev.demon.SplashScreen;
 import com.yakovlaptev.demon.chatmessages.waitingtosend.WaitingToSendQueue;
 import com.yakovlaptev.demon.services.ServiceList;
 import com.yakovlaptev.demon.services.WiFiP2pService;
@@ -38,6 +41,8 @@ import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
+
+import static com.yakovlaptev.demon.SplashScreen.dbHelper;
 
 /**
  * Class fragment that handles chat related UI which includes a list view for messages
@@ -67,6 +72,10 @@ public class WiFiChatFragment extends Fragment {
     @Setter
     private ChatManager chatManager;
     private WiFiChatMessageListAdapter adapter = null;
+    @Getter @Setter private String deviceAdress;
+    @Getter @Setter private String deviceName;
+    @Getter @Setter private byte[] deviceAvatar;
+
 
     /**
      * Callback interface to call methods reconnectToService in {@link com.yakovlaptev.demon.MainActivity}.
@@ -165,6 +174,25 @@ public class WiFiChatFragment extends Fragment {
         }
     }
 
+    public void addHistoryToChat() {
+
+        SplashScreen.DBHelper dbHelper = SplashScreen.dbHelper;
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        Log.d(">>>>>>history", deviceAdress);
+        Cursor cursor = db.rawQuery("SELECT name, message FROM history WHERE adress = '"+deviceAdress+"'", null);
+        if (cursor.moveToFirst()){
+            do {
+                String name = cursor.getString(0);
+                String message = cursor.getString(1);
+                pushMessage(name + ": " + message);
+                Log.d(">>>>>>history", name + ": " + message);
+            } while(cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        Log.d(TAG, "addHistoryToChat");
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.chatmessage_list, container, false);
@@ -190,8 +218,18 @@ public class WiFiChatFragment extends Fragment {
 
                             addToWaitingToSendQueueAndTryReconnect();
                         }
-                        /**добавить свое имя из базы*/
                         pushMessage(chatLine.getText().toString());
+
+                        WifiP2pDevice device = DestinationDeviceTabList.getInstance().getDevice(tabNumber - 1);
+                        ContentValues cv = new ContentValues();
+                        SQLiteDatabase db = dbHelper.getWritableDatabase();
+                        cv.put("adress", device.deviceAddress);
+                        cv.put("name", device.deviceName);
+                        cv.put("message", chatLine.getText().toString());
+                        long rowID = db.insert("history", null, cv);
+                        Log.d("chat", "history inserted, ID = " + rowID);
+                        dbHelper.close();
+
                         //Log.d("TEST", chatLine.getText().toString());
                         chatLine.setText("");
                     }

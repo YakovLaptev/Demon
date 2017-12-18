@@ -35,7 +35,8 @@
         android:clickable="true"
         android:elevation="100dp"
         android:foreground="?android:attr/selectableItemBackground"
-        card_view:cardBackgroundColor="@color/almostBlack">
+        card_view:cardBackgroundColor="@color/almostBlack"
+        card_view:contentPadding="4dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -74,8 +75,8 @@
 
             <ImageView
                 android:id="@+id/imageView"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="60dp"
+                android:layout_height="30dp"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"

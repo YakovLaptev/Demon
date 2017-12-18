@@ -42,7 +42,6 @@ public class LocalDeviceDialogFragment extends DialogFragment {
     private EditText deviceNameEditText;
     private EditText deviceEmailEditText;
     private Profile profile;
-    private ImageView avatarMain;
 
 
     /**
@@ -78,12 +77,10 @@ public class LocalDeviceDialogFragment extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.dialog, container, false);
-        View vm = inflater.inflate(R.layout.services_list, container, false);
 
         getDialog().setTitle(getResources().getString(R.string.choose_device_name));
         deviceNameEditText = (EditText) v.findViewById(R.id.deviceNameEditText);
         deviceEmailEditText = (EditText) v.findViewById(R.id.deviceEmailEditText);
-        avatarMain = (ImageView) vm.findViewById(R.id.imageView);
         ImageView avatar = (ImageView) v.findViewById(R.id.imageViewAvatar);
         confirmButton = (Button) v.findViewById(R.id.confirmButton);
 

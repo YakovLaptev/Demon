@@ -37,7 +37,8 @@
             android:layout_alignStart="@+id/message"
             android:layout_below="@+id/message"
             android:text="New Text"
-            android:textColor="@color/black" />
+            android:textColor="@color/white"
+            android:visibility="invisible" />
 
         <TextView
             android:id="@+id/text3"
@@ -47,11 +48,11 @@
             android:layout_below="@+id/text2"
             android:layout_marginBottom="8dp"
             android:text="New Text"
-            android:textColor="@color/black" />
+            android:textColor="@color/white" />
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="30dp"
+            android:layout_width="60dp"
             android:layout_height="30dp"
             android:layout_alignBottom="@+id/text3"
             android:layout_alignParentStart="true"

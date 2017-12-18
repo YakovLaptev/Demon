@@ -90,14 +90,12 @@ public class WiFiServicesAdapter extends RecyclerView.Adapter<WiFiServicesAdapte
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-
         WiFiP2pService service = ServiceList.getInstance().getElementByPosition(position);
         if (service != null) {
             viewHolder.nameText.setText(service.getDevice().deviceName);
             viewHolder.macAddressText.setText(service.getDevice().deviceAddress);
             viewHolder.statusText.setText(getDeviceStatus(service.getDevice().status));
         }
-
         viewHolder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

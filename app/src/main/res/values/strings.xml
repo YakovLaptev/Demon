@@ -4,7 +4,7 @@
     <string name="btn_send">Send</string>
     <string name="txt_hint">Type message…</string>
     <string name="app_name">DEMON</string>
-    <string name="choose_device_name">Choose your device name"</string>
+    <string name="choose_device_name">Change profile</string>
     <string name="ip_not_available"> </string>
     <string name="cancel_connection">Cancel connection</string>
     <string name="disconnect">Disconnect</string>

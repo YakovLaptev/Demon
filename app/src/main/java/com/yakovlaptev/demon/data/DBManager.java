@@ -10,20 +10,34 @@ public class DBManager {
 
     private static final String LOG_TAG = "DBManager";
 
-    public static void dbInsert(String[] where, String[] values) {
+//    public static void dbInsert(String[] where, String[] values) {
+//        ContentValues cv = new ContentValues();
+//        SQLiteDatabase db = dbHelper.getWritableDatabase();
+//        Log.d(LOG_TAG, "--- Insert in Profile: ---");
+//
+//        for (int i = 0; i < where.length; i++) {
+//            cv.put(where[i], values[i]);
+//        }
+//
+//        String strFilter = "_id=" + 1;
+//        db.update("profile", cv, strFilter, null);
+//        dbHelper.close();
+//
+//        Log.d(LOG_TAG, "--- " +where[0] + "-" +values[0] + ": ---");
+//        db.close();
+//    }
+
+    public static void dbInsertAvatar(byte[] value) {
         ContentValues cv = new ContentValues();
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         Log.d(LOG_TAG, "--- Insert in Profile: ---");
 
-        for (int i = 0; i < where.length; i++) {
-            cv.put(where[i], values[i]);
-        }
+        cv.put("avatar", value);
 
         String strFilter = "_id=" + 1;
         db.update("profile", cv, strFilter, null);
         dbHelper.close();
 
-        Log.d(LOG_TAG, "--- " +where[0] + "-" +values[0] + ": ---");
         db.close();
     }
 

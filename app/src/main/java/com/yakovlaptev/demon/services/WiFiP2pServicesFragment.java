@@ -39,7 +39,7 @@ import com.yakovlaptev.demon.data.Profile;
 import com.yakovlaptev.demon.model.LocalP2PDevice;
 import com.yakovlaptev.demon.services.localdeviceguielement.LocalDeviceDialogFragment;
 
-import java.util.Objects;
+import java.util.Arrays;
 
 import lombok.Getter;
 
@@ -201,12 +201,16 @@ public class WiFiP2pServicesFragment extends Fragment implements
             Profile profile = new Profile();
             profile.setName(cursor.getString(nameColIndex));
             profile.setEmail(cursor.getString(emailColIndex));
-            profile.setAvatar(cursor.getString(avatarColIndex));
+            if(cursor.getBlob(avatarColIndex).length == 0) {
+                profile.setAvatar(new byte[]{});
+            } else {
+                profile.setAvatar(cursor.getBlob(avatarColIndex));
+            }
             LocalP2PDevice.getInstance().setProfile(profile);
             localDeviceNameText.setText(profile.getName());
             localDeviceEmailText.setText(profile.getEmail());
-            Log.d("-----", "avatar = " + profile.getAvatar());
-            if(Objects.equals(profile.getAvatar(), "")) {
+            Log.d("-----", "avatar = " + Arrays.toString(profile.getAvatar()));
+            if(profile.getAvatar().length == 0) {
                 avatar.setImageDrawable(getResources().getDrawable(R.drawable.android_logo_device));
             } else {
                 avatar.setImageBitmap(ImageConverter.convertToBitmap(profile.getAvatar()));

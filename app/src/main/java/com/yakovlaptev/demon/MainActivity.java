@@ -74,6 +74,7 @@ import com.yakovlaptev.demon.socketmanagers.ClientSocketHandler;
 import com.yakovlaptev.demon.socketmanagers.GroupOwnerSocketHandler;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -124,6 +125,7 @@ public class MainActivity extends ActionBarActivity implements
     private ChatManager chatManager;
 
     private WifiP2pDevice p2pDevice;
+    private P2pDestinationDevice device;
 
     /**
      * Method to get the {@link android.os.Handler}.
@@ -475,29 +477,29 @@ public class MainActivity extends ActionBarActivity implements
         this.connectP2p(service);
     }
 
-    /**
-     * Method to send the {@link com.yakovlaptev.demon.Configuration}.MAGICADDRESSKEYWORD with the macaddress
-     * of this device to the other device.
-     *
-     * @param deviceMacAddress String that represents the macaddress of the destination device.
-     * @param name             String that represents the name of the destination device.
-     */
-    private void sendAddress(String deviceMacAddress, String name, ChatManager chatManager) {
+    private void sendAddress(String deviceMacAddress, Profile profile, ChatManager chatManager) {
         if (chatManager != null) {
             InetAddress ipAddress;
             if (socketHandler instanceof GroupOwnerSocketHandler) {
                 ipAddress = ((GroupOwnerSocketHandler) socketHandler).getIpAddress();
-
                 Log.d(TAG, "sending message with MAGICADDRESSKEYWORD, with ipaddress= " + ipAddress.getHostAddress());
-
                 chatManager.write((Configuration.PLUSSYMBOLS + Configuration.MAGICADDRESSKEYWORD +
-                        "___" + deviceMacAddress + "___" + name + "___" + ipAddress.getHostAddress()).getBytes());
+                        "___" + deviceMacAddress +
+                        "___" + profile.getName() +
+                        "___" + profile.getEmail() +
+                        "___" + ipAddress.getHostAddress()).getBytes());
+                chatManager.write((Configuration.PLUSSYMBOLS + Configuration.MAGICADDRESSKEYWORD +
+                        "___" + profile.getAvatar()).getBytes());
             } else {
                 Log.d(TAG, "sending message with MAGICADDRESSKEYWORD, without ipaddress");
                 //i use "+" symbols as initial spacing to be sure that also if some initial character will be lost i'll have always
                 //the Configuration.MAGICADDRESSKEYWORD and i can set the associated device to the correct WifiChatFragment.
                 chatManager.write((Configuration.PLUSSYMBOLS + Configuration.MAGICADDRESSKEYWORD +
-                        "___" + deviceMacAddress + "___" + name).getBytes());
+                        "___" + deviceMacAddress +
+                        "___" + profile.getName() +
+                        "___" + profile.getEmail()).getBytes());
+                chatManager.write((Configuration.PLUSSYMBOLS + Configuration.MAGICADDRESSKEYWORD +
+                        "___" + profile.getAvatar()).getBytes());
             }
         }
     }
@@ -549,6 +551,27 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
+    public void setDeviceNameWithReflection(String deviceName) {
+        try {
+            Method m = manager.getClass().getMethod(
+                    "setDeviceName",
+                    Channel.class, String.class,
+                    ActionListener.class);
+
+            m.invoke(manager, channel, deviceName,
+                    new CustomizableActionListener(
+                            MainActivity.this,
+                            "setDeviceNameWithReflection",
+                            "Device name changed",
+                            "Device name changed",
+                            "Error, device name not changed",
+                            "Error, device name not changed"));
+        } catch (Exception e) {
+            Log.e(TAG, "Exception during setDeviceNameWithReflection", e);
+            Toast.makeText(MainActivity.this, "Impossible to change the device name", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public void changeProfile(Profile profile) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         String strFilter = "_id=" + 1;
@@ -559,6 +582,7 @@ public class MainActivity extends ActionBarActivity implements
         Log.d(LOG_TAG, "name = " + profile.getName() + "  email = " + profile.getEmail());
         db.update("profile", cv, strFilter, null);
         dbHelper.close();
+        setDeviceNameWithReflection(profile.getName());
     }
 
     public void changeAvatar(View view) {
@@ -575,9 +599,9 @@ public class MainActivity extends ActionBarActivity implements
         ImageView imageView = (ImageView) findViewById(R.id.imageView);
         //ImageView imageView2 = (ImageView) findViewById(R.id.imageViewAvatar);
 
-        switch(requestCode) {
+        switch (requestCode) {
             case 1:
-                if(resultCode == RESULT_OK){
+                if (resultCode == RESULT_OK) {
                     Uri selectedImage = imageReturnedIntent.getData();
                     try {
                         bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
@@ -585,7 +609,7 @@ public class MainActivity extends ActionBarActivity implements
                         e.printStackTrace();
                     }
                     imageView.setImageBitmap(bitmap);
-                    DBManager.dbInsert(new String[]{"avatar"}, new String[]{ImageConverter.convertToBase64(bitmap)});
+                    DBManager.dbInsertAvatar(ImageConverter.convertToBase64(bitmap));
                     // Log.d("-----", str);
                     //imageView2.setImageBitmap(bitmap);
                 }
@@ -658,6 +682,7 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public boolean handleMessage(Message msg) {
         Log.d(TAG, "handleMessage, tabNum in this activity is: " + tabNum);
+        boolean flag = false;
 
         switch (msg.what) {
             //called by every device at the beginning of every connection (new or previously removed and now recreated)
@@ -669,7 +694,7 @@ public class MainActivity extends ActionBarActivity implements
                 chatManager = (ChatManager) obj;
 
                 sendAddress(LocalP2PDevice.getInstance().getLocalDevice().deviceAddress,
-                        LocalP2PDevice.getInstance().getLocalDevice().deviceName,
+                        LocalP2PDevice.getInstance().getProfile(),
                         chatManager);
 
                 break;
@@ -703,33 +728,41 @@ public class MainActivity extends ActionBarActivity implements
                     }
                 }
 
-
                 //if the message received contains Configuration.MAGICADDRESSKEYWORD is because now someone want to connect to this device
                 if (readMessage.contains(Configuration.MAGICADDRESSKEYWORD)) {
 
-                    p2pDevice = new WifiP2pDevice();
-                    p2pDevice.deviceAddress = readMessage.split("___")[1];
-                    p2pDevice.deviceName = readMessage.split("___")[2];
-                    P2pDestinationDevice device = new P2pDestinationDevice(p2pDevice);
-
-                    if (readMessage.split("___").length == 3) {
-                        Log.d(TAG, "handleMessage, p2pDevice created with: " + p2pDevice.deviceName + ", " + p2pDevice.deviceAddress);
+                    if (readMessage.split("___").length == 2) {
+                        device.setAvatar((readMessage.split("___")[1]).getBytes());
+                        Log.d(TAG, "handleMessage, p2pDevice get avatar: " + device.getAvatar());
                         manageAddressMessageReception(device);
-                    } else if (readMessage.split("___").length == 4) {
-                        device.setDestinationIpAddress(readMessage.split("")[3]);
+                    } else {
+                        p2pDevice = new WifiP2pDevice();
+                        p2pDevice.deviceAddress = readMessage.split("___")[1];
+                        p2pDevice.deviceName = readMessage.split("___")[2];
+                        device = new P2pDestinationDevice(p2pDevice);
+                        device.setEmail(readMessage.split("___")[3]);
+                        tabFragment.setUserName(p2pDevice.deviceName);
 
-                        //set client ip address
-                        TabFragment.getWiFiP2pServicesFragment().setLocalDeviceIpAddress(device.getDestinationIpAddress());
+                        if (readMessage.split("___").length == 4) {
+                            Log.d(TAG, "handleMessage, p2pDevice created with: " + p2pDevice.deviceName + ", " + p2pDevice.deviceAddress);
+                            //manageAddressMessageReception(device);
+                        } else if (readMessage.split("___").length == 5) {
+                            device.setDestinationIpAddress(readMessage.split("")[4]);
 
-                        Log.d(TAG, "handleMessage, p2pDevice created with: " + p2pDevice.deviceName + ", "
-                                + p2pDevice.deviceAddress + ", " + device.getDestinationIpAddress());
-                        manageAddressMessageReception(device);
+                            TabFragment.getWiFiP2pServicesFragment().setLocalDeviceIpAddress(device.getDestinationIpAddress());
+
+                            Log.d(TAG, "handleMessage, p2pDevice created with: " + p2pDevice.deviceName + ", "
+                                    + p2pDevice.deviceAddress + ", " + device.getDestinationIpAddress());
+                            //manageAddressMessageReception(device);
+                        }
+                        flag = true;
                     }
                     readMessage = readMessage.split("___")[1] + " in chat";
                 }
 
                 //i check if tabNum is valid only to be sure.
                 //i using this if, because this peace of code is critical and "sometimes can throw exceptions".
+                tabNum = 1;
                 if (tabFragment.isValidTabNum(tabNum)) {
 
                     if (Configuration.DEBUG_VERSION) {
@@ -740,7 +773,27 @@ public class MainActivity extends ActionBarActivity implements
                             readMessage = readMessage.replace("+", "");
                             readMessage = readMessage.replace(Configuration.MAGICADDRESSKEYWORD, "");
                         }
-                        tabFragment.getChatFragmentByTab(tabNum).pushMessage(p2pDevice.deviceName + ": " + readMessage);
+                        if(!readMessage.contains("@")) {
+                            tabFragment.getChatFragmentByTab(tabNum).pushMessage(p2pDevice.deviceName + ": " + readMessage);
+                        }
+
+                        if (flag) {
+                            tabFragment.getChatFragmentByTab(tabNum).setDeviceAdress(p2pDevice.deviceAddress);
+                            tabFragment.getChatFragmentByTab(tabNum).setDeviceName(p2pDevice.deviceName);
+                            tabFragment.getChatFragmentByTab(tabNum).setDeviceAvatar(device.getAvatar());
+                            tabFragment.getChatFragmentByTab(tabNum).addHistoryToChat();
+                            flag = false;
+                        }
+
+                        ContentValues cv = new ContentValues();
+                        SQLiteDatabase db = dbHelper.getWritableDatabase();
+                        cv.put("adress", p2pDevice.deviceAddress);
+                        cv.put("name", p2pDevice.deviceName);
+                        cv.put("message", readMessage);
+                        long rowID = db.insert("history", null, cv);
+                        Log.d("chat", "history inserted, ID = " + rowID);
+                        dbHelper.close();
+
                     } else {
                         if (!readMessage.contains(Configuration.MAGICADDRESSKEYWORD)) {
                             tabFragment.getChatFragmentByTab(tabNum).pushMessage(p2pDevice.deviceName + ": " + readMessage);
@@ -805,6 +858,8 @@ public class MainActivity extends ActionBarActivity implements
             //add a new tab, only if necessary.
             //i mean that if there is a conversation created and stopped,
             // i must restart this one and i don't create another one.
+            //TABNUM
+            tabNum = 1;
             if (tabNum > TabFragment.getWiFiChatFragmentList().size()) {
                 WiFiChatFragment frag = WiFiChatFragment.newInstance();
                 //adds a new fragment, sets the tabNumber with listsize+1, because i want to add an element to this list and get

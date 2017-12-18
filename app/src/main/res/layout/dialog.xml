@@ -17,7 +17,6 @@
         android:layout_marginRight="6dp"
         android:textAlignment="viewStart"
         android:textSize="15sp"
-        android:text="Change profile"
         android:textAllCaps="true"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/primary"

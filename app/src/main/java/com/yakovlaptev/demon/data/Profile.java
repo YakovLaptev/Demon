@@ -6,7 +6,8 @@ import java.io.Serializable;
 
 public class Profile implements Serializable {
 
-    private String name, email, avatar;
+    private String name, email;
+    private byte[] avatar;
 
     public String getName() {
         return name;
@@ -24,17 +25,17 @@ public class Profile implements Serializable {
         this.email = email;
     }
 
-    public String getAvatar() {
+    public byte[] getAvatar() {
         return avatar;
     }
 
-    public void setAvatar(String avatar) {
+    public void setAvatar(byte[] avatar) {
         this.avatar = avatar;
     }
 
     @SuppressLint("DefaultLocale")
     @Override
     public String toString() {
-        return String.format("name:%s   email:%s   email:%s", name, email, avatar);
+        return String.format("name:%s   email:%s ", name, email);
     }
 }
