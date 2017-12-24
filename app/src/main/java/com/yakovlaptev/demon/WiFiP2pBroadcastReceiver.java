@@ -1,23 +1,6 @@
 
 package com.yakovlaptev.demon;
 
-/*
- * Copyright (C) 2011 The Android Open Source Project
- * Copyright (C) 2015-2016 Stefano Cappa
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -31,13 +14,6 @@ import android.util.Log;
 
 import com.yakovlaptev.demon.model.LocalP2PDevice;
 
-/**
- * A BroadcastReceiver that notifies of important wifi p2p events.
- * This class works without callback interface, because is necessary to call a huge
- * amount of method inside the {@link com.yakovlaptev.demon.MainActivity}
- * <p></p>
- * Created by Stefano Cappa on 04/02/15, based on google code samples.
- */
 public class WiFiP2pBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = "P2pBroadcastReceiver";
@@ -46,13 +22,6 @@ public class WiFiP2pBroadcastReceiver extends BroadcastReceiver {
     private final Channel channel;
     private final Activity activity;
 
-    /**
-     * Constructor to set some parameters.
-     *
-     * @param manager  WifiP2pManager system service
-     * @param channel  Wifi p2p channel
-     * @param activity Activity associated with the receiver
-     */
     public WiFiP2pBroadcastReceiver(WifiP2pManager manager, Channel channel, Activity activity) {
         super();
         this.manager = manager;

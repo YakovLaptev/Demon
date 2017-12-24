@@ -50,7 +50,7 @@ public class SplashScreen extends Activity {
             Log.d(LOG_TAG, "---  onCreate ---");
             SQLiteDatabase db = getWritableDatabase();
             db.execSQL("create table if not exists profile (_id integer primary key autoincrement,name text,email text,avatar blob);");
-            db.execSQL("create table if not exists history (_id integer primary key autoincrement,adress text,name text,message text);");
+            db.execSQL("create table if not exists history (_id integer primary key autoincrement,adressFrom text,adressTo text,name text,message text);");
         }
 
         @Override

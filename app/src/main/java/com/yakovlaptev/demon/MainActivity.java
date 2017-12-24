@@ -1,22 +1,5 @@
 package com.yakovlaptev.demon;
 
-/*
- * Copyright (C) 2011 The Android Open Source Project
- * Copyright (C) 2015-2016 Stefano Cappa
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -57,8 +40,6 @@ import com.yakovlaptev.demon.actionlisteners.CustomDnsSdTxtRecordListener;
 import com.yakovlaptev.demon.actionlisteners.CustomDnsServiceResponseListener;
 import com.yakovlaptev.demon.actionlisteners.CustomizableActionListener;
 import com.yakovlaptev.demon.chatmessages.WiFiChatFragment;
-import com.yakovlaptev.demon.chatmessages.messagefilter.MessageException;
-import com.yakovlaptev.demon.chatmessages.messagefilter.MessageFilter;
 import com.yakovlaptev.demon.chatmessages.waitingtosend.WaitingToSendQueue;
 import com.yakovlaptev.demon.data.DBManager;
 import com.yakovlaptev.demon.data.ImageConverter;
@@ -76,6 +57,7 @@ import com.yakovlaptev.demon.socketmanagers.GroupOwnerSocketHandler;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -84,11 +66,6 @@ import lombok.Setter;
 
 import static com.yakovlaptev.demon.SplashScreen.dbHelper;
 
-/**
- * Main Activity of Pidgeon / WiFiDirect MultiChat
- * <p></p>
- * Created by Stefano Cappa on 04/02/15.
- */
 public class MainActivity extends ActionBarActivity implements
         WiFiP2pServicesFragment.DeviceClickListener,
         WiFiChatFragment.AutomaticReconnectionListener,
@@ -127,25 +104,10 @@ public class MainActivity extends ActionBarActivity implements
     private WifiP2pDevice p2pDevice;
     private P2pDestinationDevice device;
 
-    /**
-     * Method to get the {@link android.os.Handler}.
-     *
-     * @return The handler.
-     */
     Handler getHandler() {
         return handler;
     }
 
-
-    /**
-     * Method called by WiFiChatFragment using the
-     * {@link com.yakovlaptev.demon.chatmessages.WiFiChatFragment.AutomaticReconnectionListener}
-     * interface, implemented here, by this class.
-     * If the wifiP2pService is null, this method return directly, without doing anything.
-     *
-     * @param service A {@link com.yakovlaptev.demon.services.WiFiP2pService}
-     *                object that represents the device in which you want to connect.
-     */
     @Override
     public void reconnectToService(WiFiP2pService service) {
         if (service != null) {
@@ -159,10 +121,6 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-
-    /**
-     * Method to cancel a pending connection, used by the MenuItem icon.
-     */
     private void forcedCancelConnect() {
         manager.cancelConnect(channel, new ActionListener() {
             @Override
@@ -179,11 +137,6 @@ public class MainActivity extends ActionBarActivity implements
         });
     }
 
-    /**
-     * Method that force to stop the discovery phase of the wifi direct protocol, clear
-     * the {@link com.yakovlaptev.demon.services.ServiceList}, update the
-     * discovery's menu item and remove all the registered Services.
-     */
     public void forceDiscoveryStop() {
         if (discoveryStatus) {
             discoveryStatus = false;
@@ -195,11 +148,6 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    /**
-     * Method that asks to the manager to stop discovery phase.
-     * <p></p>
-     * Attention, Never call this method directly, but you should use for example {@link #forceDiscoveryStop()}
-     */
     private void internalStopDiscovery() {
         manager.stopPeerDiscovery(channel,
                 new CustomizableActionListener(
@@ -227,9 +175,6 @@ public class MainActivity extends ActionBarActivity implements
                         null));
     }
 
-    /**
-     * Method to restarts the discovery phase and to update the UI.
-     */
     public void restartDiscovery() {
         discoveryStatus = true;
 
@@ -239,11 +184,6 @@ public class MainActivity extends ActionBarActivity implements
         this.updateServiceAdapter();
     }
 
-    /**
-     * Method to discover services and put the results
-     * in {@link com.yakovlaptev.demon.services.ServiceList}.
-     * This method updates also the discovery menu item.
-     */
     private void discoverService() {
 
         ServiceList.getInstance().clear();
@@ -290,11 +230,6 @@ public class MainActivity extends ActionBarActivity implements
         });
     }
 
-
-    /**
-     * Method to notifyDataSetChanged to the adapter of the
-     * {@link com.yakovlaptev.demon.services.WiFiP2pServicesFragment}.
-     */
     private void updateServiceAdapter() {
         WiFiP2pServicesFragment fragment = TabFragment.getWiFiP2pServicesFragment();
         if (fragment != null) {
@@ -305,9 +240,6 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    /**
-     * Method to disconnect this device when this Activity calls onStop().
-     */
     private void disconnectBecauseOnStop() {
 
         this.closeAndKillSocketHandler();
@@ -331,9 +263,6 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    /**
-     * Method to close and kill socketHandler, GO or Client.
-     */
     private void closeAndKillSocketHandler() {
         if (socketHandler instanceof GroupOwnerSocketHandler) {
             ((GroupOwnerSocketHandler) socketHandler).closeSocketAndKillThisThread();
@@ -342,14 +271,6 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-
-    /**
-     * Method to disconnect and restart discovery, used by the MenuItem icon.
-     * This method tries to remove the WifiP2pGroup.
-     * If onSuccess, its clear the {@link com.yakovlaptev.demon.services.ServiceList},
-     * completely stops the discovery phase and, at the end, restarts registration and discovery.
-     * Finally this method updates the adapter
-     */
     private void forceDisconnectAndStartDiscovery() {
         //When BroadcastReceiver gets the disconnect's notification, this method will be executed two times.
         //For this reason, i use a boolean called blockForcedDiscoveryInBroadcastReceiver to check if i
@@ -386,9 +307,6 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    /**
-     * Registers a local service.
-     */
     private void startRegistration() {
         Map<String, String> record = new HashMap<>();
         record.put(Configuration.TXTRECORD_PROP_AVAILABLE, "visible");
@@ -405,13 +323,6 @@ public class MainActivity extends ActionBarActivity implements
                         "Failed to add a service"));
     }
 
-
-    /**
-     * Method that connects to the specified service.
-     *
-     * @param service The {@link com.yakovlaptev.demon.services.WiFiP2pService}
-     *                to which you want to connect.
-     */
     private void connectP2p(WiFiP2pService service) {
         Log.d(TAG, "connectP2p, tabNum before = " + tabNum);
 
@@ -449,19 +360,6 @@ public class MainActivity extends ActionBarActivity implements
                         "Failed connecting to service"));
     }
 
-
-    /**
-     * Method called by {@link com.yakovlaptev.demon.services.WiFiP2pServicesFragment}
-     * with the {@link com.yakovlaptev.demon.services.WiFiP2pServicesFragment.DeviceClickListener}
-     * interface, when the user click on an element of the recyclerview.
-     * To be precise, the call comes from {@link com.yakovlaptev.demon.services.WiFiServicesAdapter} to the
-     * {@link com.yakovlaptev.demon.services.WiFiP2pServicesFragment} using
-     * {@link com.yakovlaptev.demon.services.WiFiP2pServicesFragment.DeviceClickListener} to
-     * check if the clickedPosition is correct and finally calls this method.
-     *
-     * @param position int that represents the lists's clicked position inside
-     *                 the {@link com.yakovlaptev.demon.services.WiFiP2pServicesFragment}
-     */
     public void tryToConnectToAService(int position) {
         WiFiP2pService service = ServiceList.getInstance().getElementByPosition(position);
 
@@ -504,12 +402,6 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    /**
-     * Method to disable all {@link com.yakovlaptev.demon.socketmanagers.ChatManager}'s.
-     * This method iterates over all ChatManagers inside
-     * the {@link com.yakovlaptev.demon.chatmessages.WiFiChatFragment}'s list
-     * (in {@link com.yakovlaptev.demon.TabFragment} ) and calls "setDisable(true);".
-     */
     public void setDisableAllChatManagers() {
         for (WiFiChatFragment chatFragment : TabFragment.getWiFiChatFragmentList()) {
             if (chatFragment != null && chatFragment.getChatManager() != null) {
@@ -518,12 +410,6 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    /**
-     * Method to set the current item of the {@link android.support.v4.view.ViewPager} used
-     * in {@link com.yakovlaptev.demon.TabFragment}.
-     *
-     * @param numPage int that represents the index of the tab to show.
-     */
     public void setTabFragmentToPage(int numPage) {
         TabFragment tabfrag1 = ((TabFragment) getSupportFragmentManager().findFragmentByTag("tabfragment"));
         if (tabfrag1 != null && tabfrag1.getMViewPager() != null) {
@@ -531,17 +417,6 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    /**
-     * This Method changes the color of all messages in
-     * {@link com.yakovlaptev.demon.chatmessages.WiFiChatFragment}.
-     *
-     * @param grayScale a boolean that if is true removes all colors inside
-     *                  {@link com.yakovlaptev.demon.chatmessages.WiFiChatFragment},
-     *                  if false activates all colors only in the active
-     *                  {@link com.yakovlaptev.demon.chatmessages.WiFiChatFragment},
-     *                  based on the value of tabNum to select the correct tab in
-     *                  {@link com.yakovlaptev.demon.TabFragment}.
-     */
     public void addColorActiveTabs(boolean grayScale) {
         Log.d(TAG, "addColorActiveTabs() called, tabNum= " + tabNum);
 
@@ -616,10 +491,6 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    /**
-     * Method to setup the {@link android.support.v7.widget.Toolbar}
-     * as supportActionBar in this {@link android.support.v7.app.ActionBarActivity}.
-     */
     private void setupToolBar() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
@@ -630,17 +501,8 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-
-    /**
-     * Method called automatically by Android.
-     */
     @Override
     public void onConnectionInfoAvailable(WifiP2pInfo p2pInfo) {
-        /*
-         * The group owner accepts connections using a server socket and then spawns a
-         * client socket for every client. This is handled by {@code
-         * GroupOwnerSocketHandler}
-         */
         if (p2pInfo.isGroupOwner) {
             Log.d(TAG, "Connected as group owner");
             try {
@@ -653,7 +515,7 @@ public class MainActivity extends ActionBarActivity implements
 
                 //if this device is the Group Owner, i sets the GO's
                 //ImageView of the cardview inside the WiFiP2pServicesFragment.
-                TabFragment.getWiFiP2pServicesFragment().showLocalDeviceGoIcon();
+                //TabFragment.getWiFiP2pServicesFragment().showLocalDeviceGoIcon();
 
             } catch (IOException e) {
                 Log.e(TAG, "Failed to create a server thread - " + e);
@@ -674,11 +536,6 @@ public class MainActivity extends ActionBarActivity implements
         this.setTabFragmentToPage(tabNum);
     }
 
-    /**
-     * Method called automatically by Android when
-     * {@link com.yakovlaptev.demon.socketmanagers.ChatManager}
-     * calls handler.obtainMessage(***).sendToTarget().
-     */
     @Override
     public boolean handleMessage(Message msg) {
         Log.d(TAG, "handleMessage, tabNum in this activity is: " + tabNum);
@@ -708,32 +565,12 @@ public class MainActivity extends ActionBarActivity implements
 
                 Log.d(TAG, "Message: " + readMessage);
 
-                //message filter usage
-                try {
-                    MessageFilter.getInstance().isFiltered(readMessage);
-                } catch (MessageException e) {
-                    if (e.getReason() == MessageException.Reason.NULLMESSAGE) {
-                        Log.d(TAG, "handleMessage, filter activated because the message is null = " + readMessage);
-                        return true;
-                    } else {
-                        if (e.getReason() == MessageException.Reason.MESSAGETOOSHORT) {
-                            Log.d(TAG, "handleMessage, filter activated because the message is too short = " + readMessage);
-                            return true;
-                        } else {
-                            if (e.getReason() == MessageException.Reason.MESSAGEBLACKLISTED) {
-                                Log.d(TAG, "handleMessage, filter activated because the message contains blacklisted words. Message = " + readMessage);
-                                return true;
-                            }
-                        }
-                    }
-                }
-
                 //if the message received contains Configuration.MAGICADDRESSKEYWORD is because now someone want to connect to this device
                 if (readMessage.contains(Configuration.MAGICADDRESSKEYWORD)) {
 
                     if (readMessage.split("___").length == 2) {
                         device.setAvatar((readMessage.split("___")[1]).getBytes());
-                        Log.d(TAG, "handleMessage, p2pDevice get avatar: " + device.getAvatar());
+                        Log.d(TAG, "handleMessage, p2pDevice get avatar: " + Arrays.toString(device.getAvatar()));
                         manageAddressMessageReception(device);
                     } else {
                         p2pDevice = new WifiP2pDevice();
@@ -762,7 +599,7 @@ public class MainActivity extends ActionBarActivity implements
 
                 //i check if tabNum is valid only to be sure.
                 //i using this if, because this peace of code is critical and "sometimes can throw exceptions".
-                tabNum = 1;
+                //tabNum = 1;
                 if (tabFragment.isValidTabNum(tabNum)) {
 
                     if (Configuration.DEBUG_VERSION) {
@@ -784,15 +621,17 @@ public class MainActivity extends ActionBarActivity implements
                             tabFragment.getChatFragmentByTab(tabNum).addHistoryToChat();
                             flag = false;
                         }
-
-                        ContentValues cv = new ContentValues();
-                        SQLiteDatabase db = dbHelper.getWritableDatabase();
-                        cv.put("adress", p2pDevice.deviceAddress);
-                        cv.put("name", p2pDevice.deviceName);
-                        cv.put("message", readMessage);
-                        long rowID = db.insert("history", null, cv);
-                        Log.d("chat", "history inserted, ID = " + rowID);
-                        dbHelper.close();
+                        if(!(readMessage.contains("@") || readMessage.contains("___") || readMessage.contains("in chat"))) {
+                            ContentValues cv = new ContentValues();
+                            SQLiteDatabase db = dbHelper.getWritableDatabase();
+                            cv.put("adressFrom", p2pDevice.deviceAddress);
+                            cv.put("adressTo", LocalP2PDevice.getInstance().getLocalDevice().deviceAddress);
+                            cv.put("name",p2pDevice.deviceName);
+                            cv.put("message", readMessage);
+                            long rowID = db.insert("history", null, cv);
+                            Log.d("chat", "history inserted, ID = " + rowID);
+                            dbHelper.close();
+                        }
 
                     } else {
                         if (!readMessage.contains(Configuration.MAGICADDRESSKEYWORD)) {
@@ -812,17 +651,6 @@ public class MainActivity extends ActionBarActivity implements
         return true;
     }
 
-    /**
-     * Method to select the correct tab {@link com.yakovlaptev.demon.chatmessages.WiFiChatFragment}
-     * in {@link com.yakovlaptev.demon.TabFragment}
-     * and to prepare and to initialize everything to make chatting possible.
-     * </br>
-     * This is a critical method. Don't remove the Log.d messages.
-     *
-     * @param p2pDevice {@link com.yakovlaptev.demon.model.P2pDestinationDevice} that represent
-     *                  the device from the string message obtained in {@link #handleMessage(android.os.Message)} in
-     *                  {@code case Configuration.MESSAGE_READ}.
-     */
     private void manageAddressMessageReception(P2pDestinationDevice p2pDevice) {
 
         if (!DestinationDeviceTabList.getInstance().containsElement(p2pDevice)) {
@@ -859,7 +687,7 @@ public class MainActivity extends ActionBarActivity implements
             //i mean that if there is a conversation created and stopped,
             // i must restart this one and i don't create another one.
             //TABNUM
-            tabNum = 1;
+            //tabNum = 1;
             if (tabNum > TabFragment.getWiFiChatFragmentList().size()) {
                 WiFiChatFragment frag = WiFiChatFragment.newInstance();
                 //adds a new fragment, sets the tabNumber with listsize+1, because i want to add an element to this list and get
@@ -887,35 +715,13 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    //NOT IMPLEMENTED BUT PLEASE BE USEFUL
-//    @Override
-//    public void onChannelDisconnected() {
-//        // we will try once more
-//        if (manager != null && !retryChannel) {
-//            Toast.makeText(this, "Channel lost. Trying again", Toast.LENGTH_LONG).show();
-////            resetData();
-//            this.setTabFragmentToPage(0);
-//            retryChannel = true;
-//            manager.initialize(this, getMainLooper(), this);
-//        } else {
-//            Toast.makeText(this, "Severe! Channel is probably lost permanently. Try Disable/Re-Enable P2P.", Toast.LENGTH_LONG).show();
-////            P2PGroups.getInstance().getGroupList().clear();
-//        }
-//    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //FIXME TODO TODO FIXME
-        //this is a temporary quick fix for Android N developer preview
-        //use the strict mode with permit all is absolutely a bad practice,
-        //but at the moment there is an open issue (not fixed) reported to google.
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-        //-----------------------------------------
         setContentView(R.layout.main);
-        //activate the wakelock
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         this.setupToolBar();

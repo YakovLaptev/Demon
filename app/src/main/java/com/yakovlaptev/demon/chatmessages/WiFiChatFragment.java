@@ -1,19 +1,4 @@
 package com.yakovlaptev.demon.chatmessages;
-/*
- * Copyright (C) 2015-2016 Stefano Cappa
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -32,24 +17,20 @@ import com.yakovlaptev.R;
 import com.yakovlaptev.demon.DestinationDeviceTabList;
 import com.yakovlaptev.demon.SplashScreen;
 import com.yakovlaptev.demon.chatmessages.waitingtosend.WaitingToSendQueue;
+import com.yakovlaptev.demon.model.LocalP2PDevice;
 import com.yakovlaptev.demon.services.ServiceList;
 import com.yakovlaptev.demon.services.WiFiP2pService;
 import com.yakovlaptev.demon.socketmanagers.ChatManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import lombok.Getter;
 import lombok.Setter;
 
 import static com.yakovlaptev.demon.SplashScreen.dbHelper;
 
-/**
- * Class fragment that handles chat related UI which includes a list view for messages
- * and a message entry field with send button.
- * <p></p>
- * Created by Stefano Cappa on 04/02/15, based on google code samples.
- */
 public class WiFiChatFragment extends Fragment {
 
     private static final String TAG = "WiFiChatFragment";
@@ -76,37 +57,17 @@ public class WiFiChatFragment extends Fragment {
     @Getter @Setter private String deviceName;
     @Getter @Setter private byte[] deviceAvatar;
 
-
-    /**
-     * Callback interface to call methods reconnectToService in {@link com.yakovlaptev.demon.MainActivity}.
-     * MainActivity implements this interface.
-     */
     public interface AutomaticReconnectionListener {
         public void reconnectToService(WiFiP2pService wifiP2pService);
     }
 
-    /**
-     * Method to obtain a new Fragment's instance.
-     *
-     * @return This Fragment instance.
-     */
     public static WiFiChatFragment newInstance() {
         return new WiFiChatFragment();
     }
 
-    /**
-     * Default Fragment constructor.
-     */
     public WiFiChatFragment() {
     }
 
-
-    /**
-     * Method that combines all the messages inside the
-     * {@link com.yakovlaptev.demon.chatmessages.waitingtosend.WaitingToSendQueue}
-     * in one String and pass this one to the {@link com.yakovlaptev.demon.socketmanagers.ChatManager}
-     * to send the message to other devices.
-     */
     public void sendForcedWaitingToSendQueue() {
 
         Log.d(TAG, "sendForcedWaitingToSendQueue() called");
@@ -131,31 +92,17 @@ public class WiFiChatFragment extends Fragment {
 
     }
 
-
-    /**
-     * Method to add a message to the Fragment's listView and notifies this update to
-     * {@link com.yakovlaptev.demon.chatmessages.WiFiChatMessageListAdapter}.
-     *
-     * @param readMessage String that represents the message to add.
-     */
     public void pushMessage(String readMessage) {
         items.add(readMessage);
         adapter.notifyDataSetChanged();
     }
 
-    /**
-     * Method that updates the {@link com.yakovlaptev.demon.chatmessages.WiFiChatMessageListAdapter}.
-     */
     public void updateChatMessageListAdapter() {
         if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
     }
 
-    /**
-     * Method that add the text in the chatLine EditText to the WaitingToSendQueue and try to reconnect
-     * to the service associated to the device of this tab, with index tabNumber.
-     */
     private void addToWaitingToSendQueueAndTryReconnect() {
         //add message to the waiting to send queue
         WaitingToSendQueue.getInstance().getWaitingToSendItemsList(tabNumber).add(chatLine.getText().toString());
@@ -175,22 +122,31 @@ public class WiFiChatFragment extends Fragment {
     }
 
     public void addHistoryToChat() {
-
+        pushMessage("<<History>>");
         SplashScreen.DBHelper dbHelper = SplashScreen.dbHelper;
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         Log.d(">>>>>>history", deviceAdress);
-        Cursor cursor = db.rawQuery("SELECT name, message FROM history WHERE adress = '"+deviceAdress+"'", null);
+        Cursor cursor = db.rawQuery("SELECT name, message FROM history WHERE adressFrom = '"+deviceAdress+"' OR adressTo = '"+deviceAdress+"'" , null);
         if (cursor.moveToFirst()){
             do {
                 String name = cursor.getString(0);
                 String message = cursor.getString(1);
-                pushMessage(name + ": " + message);
-                Log.d(">>>>>>history", name + ": " + message);
+                if(!message.contains("c6:43:8f:b4:1b:8e")) {
+                    if(Objects.equals(name, LocalP2PDevice.getInstance().getProfile().getName())) {
+                        pushMessage(name + " " + message);
+                        Log.d(">>>>>>history", name + " " + message);
+                    } else {
+                        pushMessage(name + ": " + message);
+                        Log.d(">>>>>>history", name + ": " + message);
+                    }
+                }
+
             } while(cursor.moveToNext());
         }
         cursor.close();
         db.close();
         Log.d(TAG, "addHistoryToChat");
+        pushMessage("<<History>>");
     }
 
     @Override
@@ -220,11 +176,13 @@ public class WiFiChatFragment extends Fragment {
                         }
                         pushMessage(chatLine.getText().toString());
 
+
                         WifiP2pDevice device = DestinationDeviceTabList.getInstance().getDevice(tabNumber - 1);
                         ContentValues cv = new ContentValues();
                         SQLiteDatabase db = dbHelper.getWritableDatabase();
-                        cv.put("adress", device.deviceAddress);
-                        cv.put("name", device.deviceName);
+                        cv.put("adressFrom", LocalP2PDevice.getInstance().getLocalDevice().deviceAddress);
+                        cv.put("adressTo", device.deviceAddress);
+                        cv.put("name", LocalP2PDevice.getInstance().getProfile().getName());
                         cv.put("message", chatLine.getText().toString());
                         long rowID = db.insert("history", null, cv);
                         Log.d("chat", "history inserted, ID = " + rowID);

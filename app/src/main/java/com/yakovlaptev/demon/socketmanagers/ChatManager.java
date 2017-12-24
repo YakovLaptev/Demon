@@ -1,22 +1,5 @@
 package com.yakovlaptev.demon.socketmanagers;
 
-/*
- * Copyright (C) 2011 The Android Open Source Project
- * Copyright (C) 2015-2016 Stefano Cappa
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -31,39 +14,21 @@ import java.net.Socket;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Class to manage reading and writing of messages with a socket. It's use a Handler
- * to send messages to the GUI, i.e. the Android's UI Thread.
- * This class is used by {@link com.yakovlaptev.demon.socketmanagers.ClientSocketHandler}
- * and {@link com.yakovlaptev.demon.socketmanagers.GroupOwnerSocketHandler}.
- * <p></p>
- * Created by Stefano Cappa on 04/02/15, based on google code samples.
- *
- */
 public class ChatManager implements Runnable {
 
     private static final String TAG = "ChatHandler";
 
     private Socket socket = null;
     private final Handler handler;
-    @Getter @Setter private boolean disable = false; //attribute to stop or start chatmanager
+    @Getter @Setter private boolean disable = false;
     private InputStream iStream;
     private OutputStream oStream;
 
-    /**
-     * Constructor of the class
-     * @param socket Represents the {@link Socket} required in order to communicate
-     * @param handler Represents the Handler required in order to communicate
-     */
     public ChatManager(@NonNull Socket socket, @NonNull Handler handler) {
         this.socket = socket;
         this.handler = handler;
     }
 
-    /**
-     * Method to execute the {@link com.yakovlaptev.demon.socketmanagers.ChatManager}'s Thread
-     * To stop the execution, please use ".setDisable(true);".
-     */
     @Override
     public void run() {
         Log.d(TAG,"ChatManager started");
@@ -104,10 +69,6 @@ public class ChatManager implements Runnable {
         }
     }
 
-    /**
-     * Method to write a byte array (that can be a message) on the output stream.
-     * @param buffer byte[] array that represents data to write. For example, a String converted in byte[] with ".getBytes();"
-     */
     public void write(byte[] buffer) {
         try {
             oStream.write(buffer);

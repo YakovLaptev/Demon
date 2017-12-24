@@ -1,23 +1,6 @@
 
 package com.yakovlaptev.demon.socketmanagers;
 
-/*
- * Copyright (C) 2011 The Android Open Source Project
- * Copyright (C) 2015-2016 Stefano Cappa
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -34,11 +17,6 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
 
-/**
- * Class the implements the ServerSocket Handler. It's used only by the Group Owner.
- * <p></p>
- * Created by Stefano Cappa on 04/02/15, based on google code samples.
- */
 public class GroupOwnerSocketHandler extends Thread {
 
     private static final String TAG = "GroupOwnerSocketHandler";
@@ -47,11 +25,6 @@ public class GroupOwnerSocketHandler extends Thread {
     private Handler handler;
     @Getter InetAddress ipAddress;
 
-    /**
-     * Class constructor.
-     * @param handler Represents the Handler required in order to communicate
-     * @throws IOException Exception throwed by {@link ServerSocket} (SERVERPORT).
-     */
     public GroupOwnerSocketHandler(@NonNull Handler handler) throws IOException {
         try {
             socket = new ServerSocket(Configuration.GROUPOWNER_PORT);
@@ -65,18 +38,12 @@ public class GroupOwnerSocketHandler extends Thread {
 
     }
 
-    /**
-     * A ThreadPool for client sockets.
-     */
     private final ThreadPoolExecutor pool = new ThreadPoolExecutor(
             Configuration.THREAD_COUNT, Configuration.THREAD_COUNT,
             Configuration.THREAD_POOL_EXECUTOR_KEEP_ALIVE_TIME, TimeUnit.SECONDS,
             new LinkedBlockingQueue<Runnable>());
 
 
-    /**
-     * Method to close the group owner sockets and kill this entire thread.
-     */
     public void closeSocketAndKillThisThread() {
         if(socket!=null && !socket.isClosed()) {
             try {
@@ -88,10 +55,6 @@ public class GroupOwnerSocketHandler extends Thread {
         }
     }
 
-    /**
-     * Method to start the GroupOwnerSocketHandler.
-     * Attention you can't stop this method, because there is a while(true) inside.
-     */
     @Override
     public void run() {
         while (true) {
